@@ -10,11 +10,11 @@ RUN apt-get update \
 WORKDIR /app
 
 # 4. Copy & install Python deps
-COPY web/requirements.txt .
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # 5. Copy our Flask app
-COPY web/ .
+COPY . .
 
 # 6. Expose the port Flask will run on
 EXPOSE 3333
