@@ -42,34 +42,40 @@ def init_db():
 def seed_db():
     """Load file-based data into DB."""
     base = Path('data')
-    for cli_dir in base.iterdir():
-        if not cli_dir.is_dir():
+    for public_date_dir in base.iterdir():
+        try:
+            public_date = datetime.strptime(public_date_dir.name, "%Y-%m-%d").date()
+        except Exception as ex:
+            print(ex)
             continue
-        client_id = cli_dir.name
-        for tender_path in cli_dir.glob('tender_*'):
-            meta_f = tender_path / 'metadata.json'
-            rpt_f = tender_path / 'report.html'
-            if not (meta_f.exists() and rpt_f.exists()):
+        for cli_dir in public_date_dir.iterdir():
+            if not cli_dir.is_dir():
                 continue
-
-            with open(meta_f, encoding='utf-8') as mf:
-                meta = json.load(mf)
-            with open(rpt_f, encoding='utf-8') as rf:
-                report_html = rf.read()
-
-            tender = Tender(
-                client_id   = client_id,
-                tender_id   = meta.get('tender_id'),
-                url         = meta.get('url'),
-                status      = meta.get('status',''),
-                description = meta.get('description',''),
-                customer    = meta.get('customer',''),
-                start_price = meta.get('start_price',''),
-                result_date = meta.get('result_date',''),
-                public_date = datetime.now().date(),
-                report_html = report_html
-            )
-            db.session.add(tender)
+            client_id = cli_dir.name
+            for tender_path in cli_dir.glob('tender_*'):
+                meta_f = tender_path / 'metadata.json'
+                rpt_f = tender_path / 'report.html'
+                if not (meta_f.exists() and rpt_f.exists()):
+                    continue
+    
+                with open(meta_f, encoding='utf-8') as mf:
+                    meta = json.load(mf)
+                with open(rpt_f, encoding='utf-8') as rf:
+                    report_html = rf.read()
+    
+                tender = Tender(
+                    client_id   = client_id,
+                    tender_id   = meta.get('tender_id'),
+                    url         = meta.get('url'),
+                    status      = meta.get('status',''),
+                    description = meta.get('description',''),
+                    customer    = meta.get('customer',''),
+                    start_price = meta.get('start_price',''),
+                    result_date = meta.get('result_date',''),
+                    public_date = public_date,
+                    report_html = report_html
+                )
+                db.session.add(tender)
     db.session.commit()
     print("✅ seed-db done.")
 
