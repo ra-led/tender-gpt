@@ -13,7 +13,7 @@
       <aside class="sidebar">
         <h2>Фильтр по дате</h2>
         <form method="get" action="{{ url_for('dashboard', client_id=client_id) }}">
-          <label for="start_date">Начальная дата:</label>
+          <label for="start_date">Дата публикации:</label>
           <input type="date" id="start_date" name="start_date" value="{{ start_date }}">
           <label for="end_date">Конечная дата:</label>
           <input type="date" id="end_date" name="end_date" value="{{ end_date }}">

@@ -41,7 +41,7 @@ body {
 .card-left a.tender-link {
   font-size: 22px;
   font-weight: bold;
-  color: #2E354E;
+  color: rgb(54, 106, 243);
   text-decoration: none;
 }
 
@@ -69,7 +69,7 @@ body {
 .card-right .price {
   font-size: 20px;
   font-weight: bold;
-  color: #2E354E;
+  color: rgb(54, 106, 243);
   display: block;
 }
 
@@ -123,7 +123,7 @@ body {
   border: none;
   cursor: pointer;
   font-size: 16px;
-  color: #2E354E;
+  color: rgb(54, 106, 243);
 }
 
 .accordion-content {
@@ -173,7 +173,7 @@ body {
 .sidebar button {
   margin-top: 16px;
   padding: 8px;
-  background: #2E354E;
+  background: rgb(54, 106, 243);
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -199,7 +199,7 @@ body {
 
 .btn-save {
   padding: 8px 12px;
-  background: #2E354E;
+  background: rgb(54, 106, 243);
   color: #fff;
   font-size: 16px;
   border: none;
