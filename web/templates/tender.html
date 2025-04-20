@@ -26,11 +26,11 @@
       <main class="main-content" id="main-content">
         <!-- Tender count -->
         <div class="tender-count">
-          {% if tenders %}
-            Найдено {{ tenders|length }} тендер{{ 'а' if (tenders|length) in [2,3,4] else '' }}{% if (tenders|length) == 1 %{% endif %}
-          {% else %}
-            Найдено 0 тендеров
-          {% endif %}
+            {% if tenders %}
+              Найдено: {{ tenders|length }} тендер{{ 'ов' if (tenders|length)%10 == 0 or (tenders|length)%10 > 4 or (tenders|length) in range(11,15) else ('а' if (tenders|length)%10 in [2,3,4] else '') }}
+            {% else %}
+              Нет тендеров за выбранный период.
+            {% endif %}
         </div>
         <div class="container">
           {% if tenders %}
@@ -68,8 +68,6 @@
                 </div>
               </div>
             {% endfor %}
-          {% else %}
-            <p>Нет тендеров за выбранный период.</p>
           {% endif %}
         </div>
       </main>
