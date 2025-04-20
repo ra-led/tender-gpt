@@ -240,105 +240,62 @@ body {
   margin-right: 8px;
 }
 
-/* filter-bar replaces sidebar for top placement */
-.filter-bar {
-  width: 100%;
-  background: #fff;
-  padding: 16px 20px 8px 20px;
-  margin-bottom: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-}
-.filter-bar h2 {
-  margin-top: 0;
-  font-size: 20px;
-}
-.filter-bar form {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  align-items: center;
-}
-.filter-bar label {
-  font-size: 14px;
-}
-.filter-bar input[type="date"] {
-  padding: 6px;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-.filter-bar button {
-  padding: 8px 15px;
-  background: rgb(54, 106, 243);
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 15px;
-}
-.filter-bar button:hover {
-  background: #0056b3;
-}
-
-/* Result count on top */
-.results-count {
+.tender-count {
   font-size: 18px;
-  margin-bottom: 20px;
-  color: #337;
+  color: #333;
+  margin: 0 0 16px 0;
+  padding: 0 20px;
   font-weight: 500;
 }
 
-/* Remove sidebar-specific styles, if any, or repurpose */
-.sidebar { display: none; }
-.layout { display: block; }
-
-/* For mobile: filter on top, cards below, no sidebar */
-@media (max-width: 880px) {
-  .filter-bar {
-    margin-bottom: 12px;
-    padding: 10px 8px;
-    border-radius: 0;
-    box-shadow: none;
-  }
-  .filter-bar form {
+/* Responsive layout: move sidebar to top on small screens */
+@media (max-width: 900px) {
+  .layout {
     flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
   }
-  .filter-bar input[type="date"], .filter-bar button {
+  .sidebar {
     width: 100%;
+    margin-right: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    margin-bottom: 18px;
+    /* visually a section */
   }
-  .main-content.container {
-    padding: 0 3vw;
+  .main-content {
+    width: 100%;
   }
   .card-header {
     flex-direction: column;
-    gap: 6px;
     align-items: flex-start;
-    padding: 12px 10px;
   }
+
   .card-right {
     text-align: left;
     margin-top: 8px;
   }
-  .card {
-    margin-bottom: 16px;
+}
+
+/* Adjust container padding for mobile */
+@media (max-width: 560px) {
+  .container {
+    padding: 0 5px;
   }
+  .tender-count {
+    padding: 0 8px;
+    font-size: 17px;
+  }
+  .card-header,
   .card-actions {
-    padding: 10px 10px;
-    font-size: 15px;
+    padding: 10px 8px;
   }
   .accordion-header {
-    padding: 10px 10px;
+    padding: 10px 8px;
   }
-  .accordion-content {
-    padding: 0 10px;
+  .sidebar {
+    padding: 10px 8px;
   }
 }
 
 /* Landing */
-
 .landing {
   background: #000;
   color: #fff;

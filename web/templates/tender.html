@@ -8,62 +8,73 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   </head>
   <body>
-    <!-- FILTERS ALWAYS ON TOP -->
-    <section class="filter-bar">
-      <h2>Фильтр по дате</h2>
-      <form method="get" action="{{ url_for('dashboard', client_id=client_id) }}">
-        <label for="start_date">Дата публикации:</label>
-        <input type="date" id="start_date" name="start_date" value="{{ start_date }}">
-        <label for="end_date">Конечная дата:</label>
-        <input type="date" id="end_date" name="end_date" value="{{ end_date }}">
-        <button type="submit">Применить</button>
-      </form>
-    </section>
+    <div class="layout">
 
-    <main class="main-content container">
-      <div class="results-count">
-        {% if tenders %}
-          Найдено: {{ tenders|length }} тендер{{ 'ов' if (tenders|length)%10 == 0 or (tenders|length)%10 > 4 or (tenders|length) in range(11,15) else ('а' if (tenders|length)%10 in [2,3,4] else '') }}
-        {% else %}
-          Нет тендеров за выбранный период.
-        {% endif %}
-      </div>
-      {% if tenders %}
-        {% for tender in tenders %}
-          <div class="card" data-tender="{{ tender.tender_id }}">
-            <div class="card-header">
-              <div class="card-left">
-                <a href="{{ tender.url }}" class="tender-link">{{ tender.tender_id }}</a>
-                <p class="status">{{ tender.status }}</p>
-                <p class="description">{{ tender.description }}</p>
-                <p class="customer">Местоположение: {{ tender.customer }}</p>
-              </div>
-              <div class="card-right">
-                <span class="price">{{ tender.start_price }}</span>
-                <span class="result-date">{{ tender.result_date }}</span>
-              </div>
-            </div>
+      <!-- SIDEBAR / FILTERS -->
+      <aside class="sidebar" id="sidebar">
+        <h2>Фильтр по дате</h2>
+        <form method="get" action="{{ url_for('dashboard', client_id=client_id) }}">
+          <label for="start_date">Дата публикации:</label>
+          <input type="date" id="start_date" name="start_date" value="{{ start_date }}">
+          <label for="end_date">Конечная дата:</label>
+          <input type="date" id="end_date" name="end_date" value="{{ end_date }}">
+          <button type="submit">Применить</button>
+        </form>
+      </aside>
 
-            <div class="accordion">
-              <div class="accordion-header">
-                <span>Детали закупки</span>
-                <button class="toggle-btn" aria-label="Раскрыть детали">
-                  <span class="arrow">&#9660;</span>
-                </button>
-              </div>
-              <div class="accordion-content">
-                {{ tender.report_html | safe }}
-              </div>
-            </div>
+      <!-- MAIN CONTENT -->
+      <main class="main-content" id="main-content">
+        <!-- Tender count -->
+        <div class="tender-count">
+          {% if tenders %}
+            Найдено {{ tenders|length }} тендер{{ 'а' if (tenders|length) in [2,3,4] else '' }}{% if (tenders|length) == 1 %{% endif %}
+          {% else %}
+            Найдено 0 тендеров
+          {% endif %}
+        </div>
+        <div class="container">
+          {% if tenders %}
+            {% for tender in tenders %}
+              <div class="card" data-tender="{{ tender.tender_id }}">
+                <div class="card-header">
+                  <div class="card-left">
+                    <a href="{{ tender.url }}" class="tender-link">{{ tender.tender_id }}</a>
+                    <p class="status">{{ tender.status }}</p>
+                    <p class="description">{{ tender.description }}</p>
+                    <p class="customer">Местоположение: {{ tender.customer }}</p>
+                  </div>
+                  <div class="card-right">
+                    <span class="price">{{ tender.start_price }}</span>
+                    <span class="result-date">{{ tender.result_date }}</span>
+                  </div>
+                </div>
 
-            <div class="card-actions">
-              <button class="btn-save" data-tender="{{ tender.tender_id }}">Сохранить</button>
-              <button class="btn-cancel" data-tender="{{ tender.tender_id }}" style="display:none">Отменить</button>
-            </div>
-          </div>
-        {% endfor %}
-      {% endif %}
-    </main>
+                <div class="accordion">
+                  <div class="accordion-header">
+                    <span>Детали закупки</span>
+                    <button class="toggle-btn" aria-label="Раскрыть детали">
+                      <span class="arrow">&#9660;</span>
+                    </button>
+                  </div>
+                  <div class="accordion-content">
+                    {{ tender.report_html | safe }}
+                  </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="card-actions">
+                  <button class="btn-save" data-tender="{{ tender.tender_id }}">Сохранить</button>
+                  <button class="btn-cancel" data-tender="{{ tender.tender_id }}" style="display:none">Отменить</button>
+                </div>
+              </div>
+            {% endfor %}
+          {% else %}
+            <p>Нет тендеров за выбранный период.</p>
+          {% endif %}
+        </div>
+      </main>
+    </div>
+
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
   </body>
 </html>
