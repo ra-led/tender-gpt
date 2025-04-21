@@ -95,6 +95,13 @@ def load_tenders(client_id, start_date=None, end_date=None):
 def landing():
     return render_template('landing.html')
 
+# Helper to get min/max dates for tenders of a client
+def get_public_date_range(client_id):
+    min_date, max_date = db.session.query(
+        func.min(Tender.public_date), func.max(Tender.public_date)
+    ).filter(Tender.client_id == client_id).first()
+    return min_date, max_date
+
 @app.route('/dashboard/<client_id>')
 def dashboard(client_id):
     # read date filters from query string
@@ -102,6 +109,13 @@ def dashboard(client_id):
     end_s   = request.args.get('end_date','')
     fmt = '%Y-%m-%d'
     sd = ed = None
+
+    # Get min/max dates for the filter UI
+    min_date_obj, max_date_obj = get_public_date_range(client_id)
+    min_date = min_date_obj.isoformat() if min_date_obj else ""
+    max_date = max_date_obj.isoformat() if max_date_obj else ""
+
+    # Fill sd/ed only if set in the query string
     try:
         if start_s:
             sd = datetime.strptime(start_s, fmt).date()
@@ -110,13 +124,19 @@ def dashboard(client_id):
     except ValueError:
         sd = ed = None
 
+    # If start/end dates are NOT set, and we have min/max, fill for template defaults
+    start_s = start_s if start_s else min_date
+    end_s = end_s if end_s else max_date
+
     tenders = load_tenders(client_id, sd, ed)
     return render_template(
         'tender.html',
         tenders    = tenders,
         client_id  = client_id,
         start_date = start_s,
-        end_date   = end_s
+        end_date   = end_s,
+        min_date   = min_date,
+        max_date   = max_date,
     )
 
 if __name__ == '__main__':
