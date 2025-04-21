@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_
+from sqlalchemy.sql import func
 from datetime import datetime
 import json
 from pathlib import Path
