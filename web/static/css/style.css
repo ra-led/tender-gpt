@@ -136,6 +136,7 @@ body {
     rgba(255,255,255,0.5) 50%,
     rgba(255,255,255,1) 100%
   );
+}
 
 /* When open, remove max-height limit and hide the fade */
 .accordion.open .accordion-content {
