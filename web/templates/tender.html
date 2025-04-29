@@ -87,15 +87,10 @@
                 </div>
 
                 <div class="accordion">
-                  <div class="accordion-header">
-                    <span>Детали закупки</span>
-                    <button class="toggle-btn" aria-label="Раскрыть детали">
-                      <span class="arrow">&#9660;</span>
-                    </button>
-                  </div>
                   <div class="accordion-content">
                     {{ tender.report_html | safe }}
                   </div>
+                  <button class="toggle-btn">Детали закупки</button>
                 </div>
 
                 <!-- Actions -->

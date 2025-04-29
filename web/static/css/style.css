@@ -99,42 +99,69 @@ body {
 }
 
 /* Аккордеон */
+/* =========================================================================
+   Accordion preview: show only first ~6em of content, with a gradient fade
+   and a button at the bottom to toggle open/close.
+   ==========================================================================*/
 .accordion {
-  border-top: 1px solid #EAEAEA;
+  position: relative;
+  margin-top: 16px;
 }
 
-.accordion-header {
-  padding: 12px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #f9f9f9;
-  cursor: pointer;
+/* By default, show only up to 6em of the content */
+.accordion-content {
+  max-height: 6em;
+  overflow: hidden;
+  position: relative;
+  transition: max-height 0.35s ease;
+  /* optional padding tweak */
+  padding-bottom: 2.5em;
 }
 
-.accordion-header span {
-  font-size: 18px;
-  font-weight: 500;
-  color: #333;
+/* Gradient fade at the bottom of the preview */
+.accordion-content::after {
+  content: '';
+  position: absolute;
+  bottom: 2em;        /* sits above the button */
+  left: 0;
+  width: 100%;
+  height: 2em;        /* fade-height */
+  background: linear-gradient(transparent, #fff);
+  pointer-events: none;
 }
 
-.toggle-btn {
-  background: none;
+/* When open, remove max-height limit and hide the fade */
+.accordion.open .accordion-content {
+  max-height: 100vh;  /* or some sufficiently large value */
+}
+.accordion.open .accordion-content::after {
+  display: none;
+}
+
+/* Style the bottom-toggle button */
+.accordion .toggle-btn {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
   border: none;
+  color: rgb(54,106,243);
   cursor: pointer;
   font-size: 16px;
-  color: rgb(54, 106, 243);
+  padding: 8px 12px;
+  transition: color 0.2s;
+  z-index: 2;
 }
-
-.accordion-content {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s ease;
-  padding: 0 20px;
+.accordion .toggle-btn:hover {
+  color: #0056b3;
 }
-
-.accordion-content.open {
-  padding: 16px 20px;
+/* When open, change button text or rotate an arrow if you like */
+.accordion.open .toggle-btn::after {
+  content: 'Свернуть';
+}
+.accordion .toggle-btn::after {
+  content: 'Детали закупки';
 }
 
 /* Sidebar */

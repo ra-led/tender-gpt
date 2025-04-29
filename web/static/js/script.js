@@ -1,15 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
   // ACCORDION
-  document.querySelectorAll('.accordion-header').forEach(header => {
-    header.addEventListener('click', function() {
-      const content = this.nextElementSibling;
-      if (content.style.maxHeight) {
-        content.style.maxHeight = null;
-        content.classList.remove('open');
-      } else {
-        content.style.maxHeight = content.scrollHeight + 'px';
-        content.classList.add('open');
-      }
+  document.querySelectorAll('.accordion .toggle-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const accordion = this.closest('.accordion');
+      accordion.classList.toggle('open');
     });
   });
 
