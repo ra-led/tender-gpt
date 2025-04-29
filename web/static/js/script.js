@@ -1,16 +1,16 @@
 document.addEventListener('DOMContentLoaded', function(){
-  // collapse your old binder into reusable functions
+  let loading = false;
+
+  // re-usable binders for both initial + injected cards
   function bindAccordion(root){
     root.querySelectorAll('.accordion .toggle-btn').forEach(btn => {
-      // ensure we don't double-bind
       if (btn._bound) return;
       btn._bound = true;
-      btn.addEventListener('click', function(){
-        this.closest('.accordion').classList.toggle('open');
+      btn.addEventListener('click', () => {
+        btn.closest('.accordion').classList.toggle('open');
       });
     });
   }
-
   function bindSaveCancel(root){
     // SAVE
     root.querySelectorAll('.btn-save').forEach(btn => {
@@ -20,8 +20,7 @@ document.addEventListener('DOMContentLoaded', function(){
         const card = this.closest('.card');
         card.classList.add('highlighted');
         this.style.display = 'none';
-        const cancelBtn = card.querySelector('.btn-cancel');
-        if (cancelBtn) cancelBtn.style.display = 'inline-block';
+        card.querySelector('.btn-cancel').style.display = 'inline-block';
       });
     });
     // CANCEL
@@ -32,72 +31,53 @@ document.addEventListener('DOMContentLoaded', function(){
         const card = this.closest('.card');
         card.classList.remove('highlighted');
         this.style.display = 'none';
-        const saveBtn = card.querySelector('.btn-save');
-        if (saveBtn) saveBtn.style.display = 'inline-block';
+        card.querySelector('.btn-save').style.display = 'inline-block';
       });
     });
   }
 
-  // initial bind on page load
+  // initial bind
   bindAccordion(document);
   bindSaveCancel(document);
 
-  // infinite scroll
-  let loading = false;
-  window.addEventListener('scroll', throttle(onScroll, 200));
+  // grab our pagination vars from the template
+  const P = window.PAGINATION;
 
-  function onScroll(){
-    if (loading) return;
-    if (!window.PAGINATION.hasNext) return;
-
-    const scrolledToBottom = window.innerHeight + window.pageYOffset 
-                              >= document.body.offsetHeight - 100;
-    if (scrolledToBottom){
+  // IntersectionObserver for “infinite scroll”
+  const sentinel = document.getElementById('scroll-sentinel');
+  const observer = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting && P.hasNext && !loading) {
       loadNextPage();
     }
-  }
+  }, { rootMargin: '200px' });
+
+  observer.observe(sentinel);
 
   function loadNextPage(){
     loading = true;
-    window.PAGINATION.page += 1;
+    P.page++;
 
-    const { clientId, startDate, endDate, page } = window.PAGINATION;
-    const url = `/dashboard/${clientId}/data`
-            + `?page=${page}`
-            + `&start_date=${startDate}`
-            + `&end_date=${endDate}`;
-
+    const url = `/dashboard/${P.clientId}/data`
+              + `?page=${P.page}`
+              + `&start_date=${P.startDate}`
+              + `&end_date=${P.endDate}`;
     fetch(url)
       .then(r => r.json())
       .then(data => {
-        const container = document.getElementById('tender-container');
-        container.insertAdjacentHTML('beforeend', data.html);
+        document
+          .getElementById('tender-container')
+          .insertAdjacentHTML('beforeend', data.html);
 
-        // re-bind events on the newly added markup
-        bindAccordion(container);
-        bindSaveCancel(container);
+        bindAccordion(document.getElementById('tender-container'));
+        bindSaveCancel(document.getElementById('tender-container'));
 
-        window.PAGINATION.hasNext = data.has_next;
-
-        if (!data.has_next){
+        P.hasNext = data.has_next;
+        if (!P.hasNext) {
           document.getElementById('no-more-data').style.display = 'block';
+          observer.disconnect();
         }
       })
       .catch(console.error)
-      .finally(() => {
-        loading = false;
-      });
-  }
-
-  // simple throttle helper
-  function throttle(fn, wait){
-    let last = 0;
-    return function(){
-      const now = Date.now();
-      if (now - last > wait){
-        fn();
-        last = now;
-      }
-    }
+      .finally(()=>{ loading = false; });
   }
 });

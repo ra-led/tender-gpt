@@ -178,6 +178,7 @@ def dashboard(client_id):
 
     pagination = q.paginate(page=page, per_page=per_page, error_out=False)
     tenders    = pagination.items
+    total_cnt  = pagination.total
 
     return render_template(
         'tender.html',
@@ -187,7 +188,8 @@ def dashboard(client_id):
         end_date    = end_s,
         min_date    = min_date,
         max_date    = max_date,
-        has_next    = pagination.has_next
+        has_next    = pagination.has_next,
+        total_count = total_cnt
     )
 
 if __name__ == '__main__':

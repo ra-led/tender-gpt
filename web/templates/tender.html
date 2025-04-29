@@ -56,18 +56,22 @@
       <!-- MAIN CONTENT -->
       <main class="main-content" id="main-content">
         <!-- Tender count -->
-        <div class="tender-count">
-            {% if tenders %}
-              Найдено: {{ tenders|length }} тендер{{ 'ов' if (tenders|length)%10 == 0 or (tenders|length)%10 > 4 or (tenders|length) in range(11,15) else ('а' if (tenders|length)%10 in [2,3,4] else '') }}
-            {% else %}
-              Нет тендеров за выбранный период.
-            {% endif %}
-        </div>
+       <div class="tender-count">
+         {% if total_count > 0 %}
+           Найдено: {{ total_count }} тендер{{ 'ов' if (total_count)%10 == 0 or (total_count)%10 > 4 or (total_count) in range(11,15) 
+             else ('а' if (total_count)%10 in [2,3,4] else '') }}
+         {% else %}
+           Нет тендеров за выбранный период.
+         {% endif %}
+       </div>
 
       <!-- The container we will append into -->
       <div class="container" id="tender-container">
         {% include '_cards.html' %}
       </div>
+      
+      <!-- this tiny div at the bottom will fire when it scrolls into view -->
+      <div id="scroll-sentinel" style="height:1px"></div>
 
       <!-- “No more data” placeholder -->
       <div id="no-more-data"
