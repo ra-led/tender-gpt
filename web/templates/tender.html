@@ -1,110 +1,40 @@
 <!DOCTYPE html>
 <html lang="ru">
-  <head>
-    <meta charset="UTF-8">
-    <title>Список закупок</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css?family=Inter:400,500,700|Roboto:400,500,700" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <style>
-      /* Helper styles for link icon */
-      .tender-link {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        color: #3366bb;
-        text-decoration: underline;
-        font-weight: 500;
-      }
-      .tender-link svg {
-        width: 1em;
-        height: 1em;
-        vertical-align: middle;
-        fill: currentColor;
-        margin-left: 0.2em;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="layout">
+<head>
+  <!-- … your existing head … -->
+</head>
+<body>
+  <div class="layout">
+    <!-- sidebar stays the same -->
+    <main class="main-content">
+      <div class="tender-count">
+        {# your existing logic for counting #}
+      </div>
 
-      <!-- SIDEBAR / FILTERS -->
-      <aside class="sidebar" id="sidebar">
-        <h2>Фильтр по дате</h2>
-        <form method="get" action="{{ url_for('dashboard', client_id=client_id) }}">
-          <label for="start_date">Дата публикации:</label>
-          <input 
-            type="date" 
-            id="start_date" 
-            name="start_date" 
-            value="{{ start_date or min_date or '' }}"
-            min="{{ min_date or '' }}"
-            max="{{ max_date or '' }}"
-          >
-          <label for="end_date">Конечная дата:</label>
-          <input 
-            type="date" 
-            id="end_date" 
-            name="end_date" 
-            value="{{ end_date or max_date or '' }}"
-            min="{{ min_date or '' }}"
-            max="{{ max_date or '' }}"
-          >
-          <button type="submit">Применить</button>
-        </form>
-      </aside>
+      <!-- The container we will append into -->
+      <div class="container" id="tender-container">
+        {% include '_cards.html' %}
+      </div>
 
-      <!-- MAIN CONTENT -->
-      <main class="main-content" id="main-content">
-        <!-- Tender count -->
-        <div class="tender-count">
-            {% if tenders %}
-              Найдено: {{ tenders|length }} тендер{{ 'ов' if (tenders|length)%10 == 0 or (tenders|length)%10 > 4 or (tenders|length) in range(11,15) else ('а' if (tenders|length)%10 in [2,3,4] else '') }}
-            {% else %}
-              Нет тендеров за выбранный период.
-            {% endif %}
-        </div>
-        <div class="container">
-          {% if tenders %}
-            {% for tender in tenders %}
-              <div class="card" data-tender="{{ tender.tender_id }}">
-                <div class="card-header">
-                  <div class="card-left">
-                    <a href="{{ tender.url }}" class="tender-link" target="_blank" rel="noopener noreferrer">
-                      {{ tender.tender_id }}
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" focusable="false" aria-hidden="true">
-                        <path d="M12.293 2.293a1 1 0 0 1 1.414 0l4 4a1 1 0 0 1-1.414 1.414L15 5.414V14a1 1 0 1 1-2 0V5.414l-1.293 1.293A1 1 0 0 1 10.293 5.293l4-4zM5 6a3 3 0 0 0-3 3v7a3 3 0 0 0 3 3h7a3 3 0 0 0 3-3v-2a1 1 0 1 0-2 0v2a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1h2a1 1 0 1 0 0-2H5z"/>
-                      </svg>
-                    </a>
-                    <p class="status">{{ tender.status }}</p>
-                    <p class="description">{{ tender.description }}</p>
-                    <p class="customer">Местоположение: {{ tender.customer }}</p>
-                  </div>
-                  <div class="card-right">
-                    <span class="price">{{ tender.start_price }}</span>
-                    <span class="result-date">Дата проведения:<br>{{ tender.result_date }}</span>
-                  </div>
-                </div>
+      <!-- “No more data” placeholder -->
+      <div id="no-more-data"
+           style="display: none; text-align: center; padding: 16px; color: #555;">
+         Больше данных нет
+      </div>
+    </main>
+  </div>
 
-                <div class="accordion">
-                  <div class="accordion-content">
-                    {{ tender.report_html | safe }}
-                  </div>
-                  <button class="toggle-btn"></button>
-                </div>
+  <!-- Expose some vars to JS -->
+  <script>
+    window.PAGINATION = {
+      clientId: "{{ client_id }}",
+      startDate: "{{ start_date }}",
+      endDate: "{{ end_date }}",
+      page: 1,
+      hasNext: {{ 'true' if has_next else 'false' }}
+    };
+  </script>
 
-                <!-- Actions -->
-                <div class="card-actions">
-                  <button class="btn-save" data-tender="{{ tender.tender_id }}">Сохранить</button>
-                  <button class="btn-cancel" data-tender="{{ tender.tender_id }}" style="display:none">Отменить</button>
-                </div>
-              </div>
-            {% endfor %}
-          {% endif %}
-        </div>
-      </main>
-    </div>
-
-    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
-  </body>
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
 </html>

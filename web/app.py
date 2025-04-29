@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_
 from sqlalchemy.sql import func
@@ -103,6 +103,44 @@ def get_public_date_range(client_id):
     ).filter(Tender.client_id == client_id).first()
     return min_date, max_date
 
+
+@app.route('/dashboard/<client_id>/data')
+def tender_data(client_id):
+    # read page & date filters
+    page      = request.args.get('page', 1, type=int)
+    per_page  = 10
+    start_s   = request.args.get('start_date', '')
+    end_s     = request.args.get('end_date', '')
+    fmt       = '%Y-%m-%d'
+    sd = ed = None
+    try:
+        if start_s:
+            sd = datetime.strptime(start_s, fmt).date()
+        if end_s:
+            ed = datetime.strptime(end_s, fmt).date()
+    except ValueError:
+        sd = ed = None
+
+    # base query
+    q = Tender.query.filter_by(client_id=client_id)
+    if sd: q = q.filter(Tender.public_date >= sd)
+    if ed: q = q.filter(Tender.public_date <= ed)
+    q = q.order_by(Tender.public_date.desc())
+
+    # paginate
+    pagination = q.paginate(page=page, per_page=per_page, error_out=False)
+    items      = pagination.items
+    has_next   = pagination.has_next
+
+    # render JUST the cards for these tenders
+    cards_html = render_template('_cards.html', tenders=items)
+
+    return jsonify({
+        'html': cards_html,
+        'has_next': has_next
+    })
+
+
 @app.route('/dashboard/<client_id>')
 def dashboard(client_id):
     # read date filters from query string
@@ -129,15 +167,27 @@ def dashboard(client_id):
     start_s = start_s if start_s else min_date
     end_s = end_s if end_s else max_date
 
-    tenders = load_tenders(client_id, sd, ed)
+    page      = request.args.get('page', 1, type=int)
+    per_page  = 10
+
+    # build same base query
+    q = Tender.query.filter_by(client_id=client_id)
+    if sd: q = q.filter(Tender.public_date >= sd)
+    if ed: q = q.filter(Tender.public_date <= ed)
+    q = q.order_by(Tender.public_date.desc())
+
+    pagination = q.paginate(page=page, per_page=per_page, error_out=False)
+    tenders    = pagination.items
+
     return render_template(
         'tender.html',
-        tenders    = tenders,
-        client_id  = client_id,
-        start_date = start_s,
-        end_date   = end_s,
-        min_date   = min_date,
-        max_date   = max_date,
+        tenders     = tenders,
+        client_id   = client_id,
+        start_date  = start_s,
+        end_date    = end_s,
+        min_date    = min_date,
+        max_date    = max_date,
+        has_next    = pagination.has_next
     )
 
 if __name__ == '__main__':
