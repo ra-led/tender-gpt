@@ -110,6 +110,7 @@ body {
 
 /* By default, show only up to 6em of the content */
 .accordion-content {
+  padding-left: 20px;
   max-height: 6em;
   overflow: hidden;
   position: relative;
@@ -140,6 +141,7 @@ body {
 
 /* Style the bottom-toggle button */
 .accordion .toggle-btn {
+  width: 100%;
   position: absolute;
   bottom: 0;
   left: 50%;
