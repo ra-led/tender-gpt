@@ -167,10 +167,10 @@ body {
 }
 /* When open, change button text or rotate an arrow if you like */
 .accordion.open .toggle-btn::after {
-  content: '&#9650; Свернуть';
+  content: '▲ Свернуть';
 }
 .accordion .toggle-btn::after {
-  content: '&#9660; Детали закупки';
+  content: '▼ Детали закупки';
 }
 
 /* Sidebar */
