@@ -95,12 +95,12 @@
   <!-- Expose some vars to JS -->
   <script>
     window.PAGINATION = {
-      clientId: "{{ client_id }}",
-      startDate: "{{ start_date }}",
-      endDate: "{{ end_date }}",
-      page: 1,
-      hasNext: {{ 'true' if has_next else 'false' }}
-      unviewedOnly: "{{ request.args.get('unviewed_only','0') }}"
+      clientId:    "{{ client_id }}",
+      startDate:   "{{ start_date }}",
+      endDate:     "{{ end_date }}",
+      page:        1,
+      hasNext:     {{ 'true' if has_next else 'false' }},
+      unviewedOnly:"{{ request.args.get('unviewed_only','0') }}"
     };
   </script>
 
