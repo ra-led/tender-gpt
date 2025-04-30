@@ -176,7 +176,7 @@ body {
 /* “Новый” badge for unviewed cards */
 .unviewed-badge {
   display: inline-block;
-  background-color: #ffca28;
+  background-color: #95a4da;
   color: #333;
   font-size: 12px;
   font-weight: bold;
