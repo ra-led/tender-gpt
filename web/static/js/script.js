@@ -19,7 +19,11 @@ document.addEventListener('DOMContentLoaded', function(){
             fetch(`/tender/${tenderId}/viewed`, { method: 'POST' })
               .then(res => {
                 if (res.ok) {
-                  card.classList.remove('unviewed');
+                    // remove the marker class
+                    card.classList.remove('unviewed');
+                    // remove the badge node itself
+                    const badge = card.querySelector('.unviewed-badge');
+                    if (badge) badge.remove();
                 }
               })
               .catch(console.error);
