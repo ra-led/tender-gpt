@@ -134,20 +134,13 @@ def tender_data(client_id):
     })
 
 
-@app.route('/tender/<tender_id>/viewed', methods=['POST'])
-def mark_viewed(tender_id):
-    t = Tender.query.filter_by(tender_id=tender_id).first_or_404()
-    if not t.viewed:
-        t.viewed = True
-        db.session.commit()
-    return ('', 204)
-
-
 @app.route('/dashboard/<client_id>')
 def dashboard(client_id):
     # read date filters from query string
     start_s = request.args.get('start_date','')
     end_s   = request.args.get('end_date','')
+    unviewed_str = request.args.get('unviewed_only','0')
+    unviewed     = (unviewed_str == '1')
     fmt = '%Y-%m-%d'
     sd = ed = None
 
@@ -176,6 +169,8 @@ def dashboard(client_id):
     q = Tender.query.filter_by(client_id=client_id)
     if sd: q = q.filter(Tender.public_date >= sd)
     if ed: q = q.filter(Tender.public_date <= ed)
+    if unviewed:
+        q = q.filter(Tender.viewed == False)
     q = q.order_by(Tender.public_date.desc())
 
     pagination = q.paginate(page=page, per_page=per_page, error_out=False)
@@ -193,6 +188,16 @@ def dashboard(client_id):
         has_next    = pagination.has_next,
         total_count = total_cnt
     )
+
+
+@app.route('/tender/<tender_id>/viewed', methods=['POST'])
+def mark_viewed(tender_id):
+    t = Tender.query.filter_by(tender_id=tender_id).first_or_404()
+    if not t.viewed:
+        t.viewed = True
+        db.session.commit()
+    return ('', 204)
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=3333)
