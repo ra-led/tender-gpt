@@ -1,16 +1,34 @@
 document.addEventListener('DOMContentLoaded', function(){
   let loading = false;
 
-  // re-usable binders for both initial + injected cards
   function bindAccordion(root){
+    // ACCORDION
     root.querySelectorAll('.accordion .toggle-btn').forEach(btn => {
       if (btn._bound) return;
       btn._bound = true;
+
       btn.addEventListener('click', () => {
-        btn.closest('.accordion').classList.toggle('open');
+        const accordion = btn.closest('.accordion');
+        accordion.classList.toggle('open');
+
+        // if we just opened it, and it was unviewed, mark it viewed
+        if (accordion.classList.contains('open')) {
+          const card = accordion.closest('.card');
+          if (card.classList.contains('unviewed')) {
+            const tenderId = card.dataset.tender;
+            fetch(`/tender/${tenderId}/viewed`, { method: 'POST' })
+              .then(res => {
+                if (res.ok) {
+                  card.classList.remove('unviewed');
+                }
+              })
+              .catch(console.error);
+          }
+        }
       });
     });
   }
+
   function bindSaveCancel(root){
     // SAVE
     root.querySelectorAll('.btn-save').forEach(btn => {
@@ -40,10 +58,8 @@ document.addEventListener('DOMContentLoaded', function(){
   bindAccordion(document);
   bindSaveCancel(document);
 
-  // grab our pagination vars from the template
   const P = window.PAGINATION;
 
-  // IntersectionObserver for “infinite scroll”
   const sentinel = document.getElementById('scroll-sentinel');
   const observer = new IntersectionObserver(entries => {
     if (entries[0].isIntersecting && P.hasNext && !loading) {
@@ -59,8 +75,10 @@ document.addEventListener('DOMContentLoaded', function(){
 
     const url = `/dashboard/${P.clientId}/data`
               + `?page=${P.page}`
-              + `&start_date=${P.startDate}`
-              + `&end_date=${P.endDate}`;
+              + `&start_date=${encodeURIComponent(P.startDate)}`
+              + `&end_date=${encodeURIComponent(P.endDate)}`
+              + `&unviewed_only=${P.unviewedOnly}`;
+
     fetch(url)
       .then(r => r.json())
       .then(data => {
@@ -68,6 +86,7 @@ document.addEventListener('DOMContentLoaded', function(){
           .getElementById('tender-container')
           .insertAdjacentHTML('beforeend', data.html);
 
+        // re-bind on the newly injected cards
         bindAccordion(document.getElementById('tender-container'));
         bindSaveCancel(document.getElementById('tender-container'));
 
@@ -78,6 +97,6 @@ document.addEventListener('DOMContentLoaded', function(){
         }
       })
       .catch(console.error)
-      .finally(()=>{ loading = false; });
+      .finally(() => { loading = false; });
   }
 });

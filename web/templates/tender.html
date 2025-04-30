@@ -49,6 +49,17 @@
             min="{{ min_date or '' }}"
             max="{{ max_date or '' }}"
           >
+          
+          <label for="unviewed_only" style="margin-top:12px; font-size:14px;">
+              <input
+                type="checkbox"
+                id="unviewed_only"
+                name="unviewed_only"
+                value="1"
+                {% if request.args.get('unviewed_only') == '1' %}checked{% endif %}>
+              Только непросмотренные
+          </label>
+            
           <button type="submit">Применить</button>
         </form>
       </aside>
@@ -89,6 +100,7 @@
       endDate: "{{ end_date }}",
       page: 1,
       hasNext: {{ 'true' if has_next else 'false' }}
+      unviewedOnly: "{{ request.args.get('unviewed_only','0') }}"
     };
   </script>
 

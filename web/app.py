@@ -16,17 +16,18 @@ db = SQLAlchemy(app)
 # 2) Define our Tender model
 class Tender(db.Model):
     __tablename__ = 'tenders'
-    id = db.Column(db.Integer, primary_key=True)
-    client_id = db.Column(db.String, index=True, nullable=False)
-    tender_id = db.Column(db.String, unique=True, nullable=False)
-    url = db.Column(db.String)
-    status = db.Column(db.String)
+    id          = db.Column(db.Integer, primary_key=True)
+    client_id   = db.Column(db.String, index=True, nullable=False)
+    tender_id   = db.Column(db.String, unique=True, nullable=False)
+    url         = db.Column(db.String)
+    status      = db.Column(db.String)
     description = db.Column(db.Text)
-    customer = db.Column(db.String)
+    customer    = db.Column(db.String)
     start_price = db.Column(db.String)
     result_date = db.Column(db.String)
     public_date = db.Column(db.Date)       # filter by this date
     report_html = db.Column(db.Text)
+    viewed      = db.Column(db.Boolean, default=False, nullable=False)
 
     def __repr__(self):
         return f'<Tender {self.tender_id}>'
@@ -81,17 +82,7 @@ def seed_db():
     print("✅ seed-db done.")
 
 
-# 5) Fetch from DB with optional date filtering
-def load_tenders(client_id, start_date=None, end_date=None):
-    q = Tender.query.filter_by(client_id=client_id)
-    if start_date:
-        q = q.filter(Tender.public_date >= start_date)
-    if end_date:
-        q = q.filter(Tender.public_date <= end_date)
-    return q.order_by(Tender.public_date.desc()).all()
-
 # 6) Routes
-
 @app.route('/')
 def landing():
     return render_template('landing.html')
@@ -106,11 +97,13 @@ def get_public_date_range(client_id):
 
 @app.route('/dashboard/<client_id>/data')
 def tender_data(client_id):
-    # read page & date filters
-    page      = request.args.get('page', 1, type=int)
-    per_page  = 10
-    start_s   = request.args.get('start_date', '')
-    end_s     = request.args.get('end_date', '')
+    # read page & filters
+    page         = request.args.get('page', 1, type=int)
+    per_page     = 10
+    start_s      = request.args.get('start_date','')
+    end_s        = request.args.get('end_date','')
+    unviewed_str = request.args.get('unviewed_only','0')
+    unviewed     = (unviewed_str == '1')
     fmt       = '%Y-%m-%d'
     sd = ed = None
     try:
@@ -123,22 +116,31 @@ def tender_data(client_id):
 
     # base query
     q = Tender.query.filter_by(client_id=client_id)
-    if sd: q = q.filter(Tender.public_date >= sd)
-    if ed: q = q.filter(Tender.public_date <= ed)
-    q = q.order_by(Tender.public_date.desc())
+    if sd:      q = q.filter(Tender.public_date >= sd)
+    if ed:      q = q.filter(Tender.public_date <= ed)
+    if unviewed:
+        q = q.filter(Tender.viewed == False)
 
     # paginate
+    q = q.order_by(Tender.public_date.desc())
     pagination = q.paginate(page=page, per_page=per_page, error_out=False)
-    items      = pagination.items
-    has_next   = pagination.has_next
 
     # render JUST the cards for these tenders
-    cards_html = render_template('_cards.html', tenders=items)
+    cards_html = render_template('_cards.html', tenders=pagination.items)
 
     return jsonify({
-        'html': cards_html,
-        'has_next': has_next
+      'html': cards_html,
+      'has_next': pagination.has_next
     })
+
+
+@app.route('/tender/<tender_id>/viewed', methods=['POST'])
+def mark_viewed(tender_id):
+    t = Tender.query.filter_by(tender_id=tender_id).first_or_404()
+    if not t.viewed:
+        t.viewed = True
+        db.session.commit()
+    return ('', 204)
 
 
 @app.route('/dashboard/<client_id>')

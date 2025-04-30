@@ -173,6 +173,24 @@ body {
   content: '▼ Детали закупки';
 }
 
+/* “Новый” badge for unviewed cards */
+.unviewed-badge {
+  display: inline-block;
+  background-color: #ffca28;
+  color: #333;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 12px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+/* Optional: also highlight entire card lightly */
+.card.unviewed {
+  box-shadow: 0 0 0 2px rgba(255,202,40,0.4);
+}
+
 /* Sidebar */
 .layout {
   display: flex;
