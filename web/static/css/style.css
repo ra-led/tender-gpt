@@ -200,6 +200,8 @@ body {
 }
 
 .sidebar {
+  position: sticky;    /* ← never scrolls off screen */
+  top: 20px;           /* ← never scrolls off screen */
   width: 240px;
   background: #fff;
   padding: 20px;

@@ -1,5 +1,8 @@
 from flask import Flask, render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from io import BytesIO
+from flask import send_file
+from openpyxl import Workbook
 from sqlalchemy import and_
 from sqlalchemy.sql import func
 from datetime import datetime
@@ -187,6 +190,69 @@ def dashboard(client_id):
         max_date    = max_date,
         has_next    = pagination.has_next,
         total_count = total_cnt
+    )
+
+
+@app.route('/dashboard/<client_id>/export')
+def export_excel(client_id):
+    # read the same filters from the URL
+    start_s = request.args.get('start_date','')
+    end_s   = request.args.get('end_date','')
+    unviewed = (request.args.get('unviewed_only','0')=='1')
+    fmt = '%Y-%m-%d'
+
+    # parse dates
+    sd = ed = None
+    try:
+        if start_s: sd = datetime.strptime(start_s, fmt).date()
+        if end_s:   ed = datetime.strptime(end_s, fmt).date()
+    except ValueError:
+        pass
+
+    # query ALL matching tenders (no paginate)
+    q = Tender.query.filter_by(client_id=client_id)
+    if sd:      q = q.filter(Tender.public_date >= sd)
+    if ed:      q = q.filter(Tender.public_date <= ed)
+    if unviewed: q = q.filter(Tender.viewed == False)
+    q = q.order_by(Tender.public_date.desc())
+    rows = q.all()
+
+    # build XLSX in memory
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Tenders"
+
+    # header
+    ws.append([
+      "tender_id","url","status","description",
+      "customer","start_price","result_date",
+      "public_date","viewed"
+    ])
+
+    # data
+    for t in rows:
+        ws.append([
+          t.tender_id,
+          t.url,
+          t.status,
+          t.description,
+          t.customer,
+          t.start_price,
+          t.result_date,
+          t.public_date.isoformat(),
+          "Yes" if t.viewed else "No"
+        ])
+
+    # stream it back
+    bio = BytesIO()
+    wb.save(bio)
+    bio.seek(0)
+    fn = f"tenders_{client_id}_{start_s or 'all'}_{end_s or 'all'}.xlsx"
+    return send_file(
+      bio,
+      mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      as_attachment=True,
+      download_name=fn
     )
 
 

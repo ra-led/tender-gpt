@@ -103,4 +103,16 @@ document.addEventListener('DOMContentLoaded', function(){
       .catch(console.error)
       .finally(() => { loading = false; });
   }
+  // export
+  const exportLink = document.getElementById('export-link');
+  if (exportLink) {
+    exportLink.addEventListener('click', e => {
+      e.preventDefault();
+      // grab client_id and current qs
+      const cid = window.PAGINATION.clientId;
+      const qs  = window.location.search; 
+      // navigate to our new export route
+      window.location.href = `/dashboard/${cid}/export${qs}`;
+    });
+  }
 });
