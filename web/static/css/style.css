@@ -293,7 +293,7 @@ body {
   background: #c0392b;
 }
 
-/* (Optional) adjust .btn-save margin */
+/* adjust .btn-save margin */
 .btn-save {
   margin-right: 8px;
 }
@@ -304,6 +304,11 @@ body {
   margin: 0 0 16px 0;
   padding: 0 20px;
   font-weight: 500;
+}
+
+/* make every element include padding/border in its width/height */
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
 /* Responsive layout: move sidebar to top on small screens */
