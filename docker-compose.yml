@@ -71,6 +71,8 @@ services:
       - "7700:7700"
     environment:
       MEILI_MASTER_KEY: masterKey
+    volumes:
+      - meilisearch_data:/data.ms
 
   # ----------------------------------------------------------------------------
   # client data DB
@@ -94,4 +96,5 @@ volumes:
   html:
   vhost.d:
   pgdata:
+  meilisearch_data:
 
