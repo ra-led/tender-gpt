@@ -7,29 +7,36 @@ document.addEventListener('DOMContentLoaded', function(){
       if (btn._bound) return;
       btn._bound = true;
 
-      btn.addEventListener('click', () => {
-        const accordion = btn.closest('.accordion');
-        accordion.classList.toggle('open');
-
-        // if we just opened it, and it was unviewed, mark it viewed
-        if (accordion.classList.contains('open')) {
+        btn.addEventListener('click', () => {
+          const accordion = btn.closest('.accordion');
           const card = accordion.closest('.card');
-          if (card.classList.contains('unviewed')) {
-            const tenderId = card.dataset.tender;
-            fetch(`/tender/${tenderId}/viewed`, { method: 'POST' })
-              .then(res => {
-                if (res.ok) {
-                    // remove the marker class
-                    card.classList.remove('unviewed');
-                    // remove the badge node itself
-                    const badge = card.querySelector('.unviewed-badge');
-                    if (badge) badge.remove();
-                }
-              })
-              .catch(console.error);
+          const wasOpen = accordion.classList.contains('open');
+        
+          accordion.classList.toggle('open');
+        
+          if (!accordion.classList.contains('open') && wasOpen) {
+            // Accordion just collapsed, scroll card into view
+            card.scrollIntoView({ behavior: 'smooth', block: 'start' });
           }
-        }
-      });
+        
+          // if we just opened it, and it was unviewed, mark it viewed
+          if (accordion.classList.contains('open')) {
+            if (card.classList.contains('unviewed')) {
+              const tenderId = card.dataset.tender;
+              fetch(`/tender/${tenderId}/viewed`, { method: 'POST' })
+                .then(res => {
+                  if (res.ok) {
+                      // remove the marker class
+                      card.classList.remove('unviewed');
+                      // remove the badge node itself
+                      const badge = card.querySelector('.unviewed-badge');
+                      if (badge) badge.remove();
+                  }
+                })
+                .catch(console.error);
+            }
+          }
+        });
     });
   }
 
