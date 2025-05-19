@@ -53,7 +53,7 @@ services:
       - MEILI_URL=http://meilisearch:7700
       - MEILI_MASTER_KEY=masterKey
       # User data DB
-      - DATABASE_URL= postgresql://pguser:pgpass@postgres:5432/tendersdb
+      - DATABASE_URL=postgresql://pguser:pgpass@postgres:5432/tendersdb
     volumes:
       - ./data:/app/data
       - ./instance:/app/instance

@@ -54,7 +54,7 @@ def get_meili_docs_by_ids(ids):
     docs = meili_index.get_documents({'filter': f'tender_id IN ["' + '","'.join(ids) + '"]', 'limit': len(ids)})
     # docs['results'] is the list of objects
     # Return a dict {tender_id: doc}
-    return {doc['tender_id']: doc for doc in docs.get('results', [])}
+    return {doc.tender_id: dict(doc) for doc in docs.results}
 
 def get_min_max_pub_date(client_id):
     """Get min/max report_date for filter UI."""
