@@ -36,5 +36,62 @@ services:
   # ----------------------------------------------------------------------------
   # 3) flask web app
   # ----------------------------------------------------------------------------
-  web:    build: ./web    container_name: web-app    restart: always    expose:      - "3333"    # internal port only    environment:      # tell nginx-proxy what hostname(s) to generate for      - VIRTUAL_HOST=tender-gpt.ru,tender-gpt.ru      # let’s encrypt will issue a cert for these      - LETSENCRYPT_HOST=tender-gpt.ru,www.tender-gpt.ru      - LETSENCRYPT_EMAIL=yura@tender-gpt.ru    volumes:      - ./data:/app/data
-      - ./instance:/app/instance    depends_on:      - nginx-proxy# volumes for persisting certs & ACME challengesvolumes:  certs:  html:  vhost.d:
+  web:
+    build: ./web
+    container_name: web-app
+    restart: always
+    expose:
+      - "3333"
+    # internal port only
+    environment:
+      # tell nginx-proxy what hostname(s) to generate for
+      - VIRTUAL_HOST=tender-gpt.ru,tender-gpt.ru
+      # let’s encrypt will issue a cert for these
+      - LETSENCRYPT_HOST=tender-gpt.ru,www.tender-gpt.ru
+      - LETSENCRYPT_EMAIL=yura@tender-gpt.ru
+      # Search crews and tenders data
+      - MEILI_URL=http://meilisearch:7700
+      - MEILI_MASTER_KEY=masterKey
+      # User data DB
+      - DATABASE_URL=postgres://pguser:pgpass@postgres:5432/tendersdb
+    volumes:
+      - ./data:/app/data
+      - ./instance:/app/instance
+    depends_on:
+      - nginx-proxy
+      - meilisearch
+
+  # ----------------------------------------------------------------------------
+  # text search DB
+  # ----------------------------------------------------------------------------
+  meilisearch:
+    image: getmeili/meilisearch:latest
+    container_name: meilisearch
+    ports:
+      - "7700:7700"
+    environment:
+      MEILI_MASTER_KEY: masterKey
+
+  # ----------------------------------------------------------------------------
+  # client data DB
+  # ----------------------------------------------------------------------------
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER:  pguser
+      POSTGRES_PASSWORD: pgpass
+      POSTGRES_DB:     tendersdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+# volumes for persisting certs & ACME challenges
+volumes:
+  certs:
+  html:
+  vhost.d:
+  pgdata:
+
