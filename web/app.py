@@ -35,6 +35,7 @@ class Report(db.Model):
     template_id = db.Column(db.Text, nullable=False)
     tender_id = db.Column(db.Text, nullable=False)
     report_date = db.Column(db.Date, nullable=False)
+    end_date = db.Column(db.Date, nullable=False)
     report_html = db.Column(db.Text, nullable=False)
     viewed = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.TIMESTAMP(timezone=True), server_default=func.now())
@@ -107,6 +108,8 @@ def tender_data(client_id):
 
     # Query from Postgres (the "user" subset)
     q = Report.query.filter(Report.client_id == client_id)
+    # only tenders whose end_date is today or future
+    q = q.filter(Report.end_date >= datetime.now().date())
     if sd: q = q.filter(Report.report_date >= sd)
     if ed: q = q.filter(Report.report_date <= ed)
     if unviewed: q = q.filter(Report.viewed == False)
@@ -150,6 +153,8 @@ def dashboard(client_id):
     per_page = 10
 
     q = Report.query.filter(Report.client_id == client_id)
+    # only tenders whose end_date is today or future
+    q = q.filter(Report.end_date >= datetime.now().date())
     if sd: q = q.filter(Report.report_date >= sd)
     if ed: q = q.filter(Report.report_date <= ed)
     if unviewed: q = q.filter(Report.viewed == False)
@@ -187,6 +192,8 @@ def export_excel(client_id):
         pass
 
     q = Report.query.filter(Report.client_id == client_id)
+    # only tenders whose end_date is today or future
+    q = q.filter(Report.end_date >= datetime.now().date())
     if sd: q = q.filter(Report.report_date >= sd)
     if ed: q = q.filter(Report.report_date <= ed)
     if unviewed: q = q.filter(Report.viewed == False)
