@@ -30,6 +30,10 @@
   </head>
 <body>
   <div class="layout">
+    <div class="tab-bar">
+        <a href="{{ url_for('client_template_stat', client_id=client_id, template_id=template_id) }}" class="active">Статистика</a>
+        <a href="{{ url_for('dashboard', client_id=client_id) }}?template_id={{ template_id }}">Отчеты</a>
+    </div>
       <!-- SIDEBAR / FILTERS -->
       <aside class="sidebar" id="sidebar">
         <div class="tab-bar">
