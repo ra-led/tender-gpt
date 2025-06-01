@@ -3,7 +3,8 @@ from flask import Flask, render_template, request, jsonify, send_file
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_
 from sqlalchemy.sql import func, desc
-from datetime import datetime
+from sqlalchemy import cast, Date
+from datetime import datetime, timedelta
 from openpyxl import Workbook
 from io import BytesIO
 from meilisearch import Client as MeiliClient
@@ -41,6 +42,25 @@ class Report(db.Model):
     created_at = db.Column(db.TIMESTAMP(timezone=True), server_default=func.now())
 
     __table_args__ = (db.UniqueConstraint('client_id', 'template_id', 'tender_id'),)
+
+
+class KWReport(db.Model):
+    __tablename__ = 'kw_report'
+    id = db.Column(db.Integer, primary_key=True)
+    client_id = db.Column(db.Text, nullable=False)
+    template_id = db.Column(db.Text, nullable=False)
+    tender_id = db.Column(db.Text, nullable=False)
+    public_date = db.Column(db.Date, nullable=True)
+    description = db.Column(db.Text)
+    lot_name = db.Column(db.Text)
+    url = db.Column(db.Text)
+    highlight = db.Column(db.Text)
+    created_at = db.Column(db.TIMESTAMP(timezone=True), server_default=db.func.now())
+    # ... add any other fields if needed
+
+    __table_args__ = (
+        db.Index('ix_kw_client_template_date', 'client_id', 'template_id', 'public_date'),
+    )
 
 ###########################
 # HELPERS
@@ -80,6 +100,23 @@ def build_merged_tender(report, doc):
     if doc:
         row.update(doc)
     return row
+
+def get_kw_results_daily(client_id, template_id, from_date, to_date):
+    # Returns list of dicts: [{'date': 'YYYY-MM-DD', 'count': N}]
+    rows = (
+        db.session.query(
+            cast(KWReport.public_date, Date).label('d'),
+            db.func.count(KWReport.tender_id)
+        )
+        .filter(KWReport.client_id == client_id)
+        .filter(KWReport.template_id == template_id)
+        .filter(KWReport.public_date >= from_date)
+        .filter(KWReport.public_date <= to_date)
+        .group_by('d')
+        .order_by('d')
+        .all()
+    )
+    return [{'date': str(r[0]), 'count': r[1]} for r in rows]
 
 ###############
 # ROUTES
@@ -238,6 +275,62 @@ def export_excel(client_id):
         as_attachment=True,
         download_name=fn
     )
+
+
+@app.route('/client/<client_id>/template/<template_id>/stat', endpoint='client_template_stat')
+def client_template_stat(client_id, template_id):
+    # Date range: last 10 days (today inclusive)
+    today = datetime.now().date()
+    from_date = today - timedelta(days=9)
+    to_date = today
+
+    # 1. Get template info from config.
+    import json
+    with open('config.json', encoding='utf-8') as f:
+        config = json.load(f)
+    template = None
+    for t in config['clients']:
+        if t['client_id'] == client_id and t['template_id'] == template_id:
+            template = t
+            break
+    if not template:
+        return "Not found", 404
+
+    # 2. Get stats data
+    # a. Keyword count per-day
+    kw_per_day = get_kw_results_daily(client_id, template_id, from_date, to_date)
+    # Expect: list of {'date': '2024-06-09', 'count': 5}, etc.
+
+    # b. AI-approved per-day (Reports)
+    report_counts = (
+        db.session.query(Report.report_date, func.count())
+        .filter_by(client_id=client_id, template_id=template_id)
+        .filter(Report.report_date >= from_date, Report.report_date <= to_date)
+        .group_by(Report.report_date)
+        .order_by(Report.report_date)
+        .all()
+    )
+    report_per_day = {dt.isoformat(): cnt for dt, cnt in report_counts}
+
+    # Prepare series for 10 days:
+    dates = [(from_date + timedelta(days=i)) for i in range(10)]
+    chart_data = []
+    for d in dates:
+        datestr = d.isoformat()
+        kw_cnt = next((item['count'] for item in kw_per_day if item['date']==datestr), 0)
+        rpt_cnt = report_per_day.get(datestr, 0)
+        chart_data.append({
+            'date': datestr,
+            'kw_count': kw_cnt,
+            'ai_count': rpt_cnt
+        })
+    return render_template('client_stat.html',
+        client_id=client_id,
+        template=template,
+        template_id=template_id,
+        chart_data=chart_data
+    )
+
 
 @app.route('/tender/<tender_id>/viewed', methods=['POST'])
 def mark_viewed(tender_id):

@@ -9,7 +9,11 @@
    ```bash
    sudo docker compose exec -it web flask seed-db
    ```
-3. Run your app as normal:
+3. Index text data
+   ```bash
+   ocker-compose exec -it web flask index-tenders
+   ```
+4. Run your app as normal:
    ```bash
    python app.py
    ```
