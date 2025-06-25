@@ -168,6 +168,7 @@ def tender_data(client_id):
 @app.route('/dashboard/<client_id>')
 def dashboard(client_id):
     # Filters
+    template_id = request.args.get('template_id', '1')
     start_s = request.args.get('start_date', '')
     end_s = request.args.get('end_date', '')
     unviewed = (request.args.get('unviewed_only', '0') == '1')
@@ -207,6 +208,7 @@ def dashboard(client_id):
         'tender.html',
         tenders     = tenders,
         client_id   = client_id,
+        template_id = template_id,
         start_date  = start_s,
         end_date    = end_s,
         min_date    = min_date,
