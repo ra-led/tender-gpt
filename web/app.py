@@ -212,7 +212,8 @@ def dashboard(client_id):
         min_date    = min_date,
         max_date    = max_date,
         has_next    = pagination.has_next,
-        total_count = pagination.total
+        total_count = pagination.total,
+        active_tab  = 'reports'
     )
 
 @app.route('/dashboard/<client_id>/export')
@@ -328,7 +329,8 @@ def client_template_stat(client_id, template_id):
         client_id=client_id,
         template=template,
         template_id=template_id,
-        chart_data=chart_data
+        chart_data=chart_data,
+        active_tab='stat' 
     )
 
 

@@ -98,6 +98,42 @@ body {
   filter: brightness(0.8);
 }
 
+/* ===================================================================
+   Global Tab-Bar: pulled out of individual templates and made sticky
+   =================================================================== */
+.tab-bar {
+  position: sticky;    /* or `fixed` if you want it to always float */
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  background: #fff;
+  padding: 10px 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  margin-bottom: 0;    /* the templates can push their own margin below */
+}
+
+.tab-bar a {
+  padding: 10px 20px;
+  margin-right: 8px;
+  border-radius: 6px;
+  text-decoration: none;
+  background: #F6F6F9;
+  color: #333;
+  font-weight: 500;
+  transition: background 0.2s, color 0.2s;
+}
+
+.tab-bar a:hover {
+  background: #e2e6ee;
+}
+
+.tab-bar a.active {
+  background: #346AF3;
+  color: #fff;
+}
+
 /* Аккордеон */
 /* =========================================================================
    Accordion preview: show only first ~6em of content, with a gradient fade
