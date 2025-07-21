@@ -1,6 +1,9 @@
 *.DS_Store*
 *.db
 
+etl/archive*
+etl/models*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
