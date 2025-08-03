@@ -13,7 +13,7 @@ from sqlalchemy import (
     text,
     Index
 )
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 # -----------------------------------------------------------------------------
@@ -23,12 +23,13 @@ DATABASE_URL = os.getenv(
     'DATABASE_URL',
     'postgresql://pguser:pgpass@localhost:5432/tendersdb'
 )
-DATA_ROOT = os.getenv('DATA_ROOT', '/Users/yuratomakov/zakupki-gov/tender-gpt/etl/archive/31.05.2025/')
+DATA_ROOT = os.getenv('DATA_ROOT', './')
 
 # -----------------------------------------------------------------------------
 # SQLAlchemy setup
 # -----------------------------------------------------------------------------
 Base = declarative_base()
+
 
 class KWReport(Base):
     __tablename__ = 'kw_report'
@@ -65,6 +66,8 @@ class KWReport(Base):
 
 engine  = create_engine(DATABASE_URL, echo=False)
 Session = sessionmaker(bind=engine)
+# Base.metadata.drop_all(engine)
+# Base.metadata.create_all(engine)
 
 def init_db():
     Base.metadata.create_all(engine)
@@ -173,42 +176,3 @@ def upsert_kw_reports():
 if __name__ == "__main__":
     init_db()
     upsert_kw_reports()
-
-    
-# import pandas as pd
-
-# DATABASE_URL="postgresql://pguser:pgpass@158.160.51.157:5432/tendersdb" 
-
-# # Create a session
-# session = Session()
-
-# try:
-#     # Query all rows from kw_report table using pandas
-#     df = pd.read_sql(session.query(KWReport).statement, session.bind)
-    
-#     print(f"Loaded {len(df)} rows from kw_report table")
-#     print(df.head())
-    
-# finally:
-#     # Close the session
-#     session.close()
-    
-    
-# from sqlalchemy import update
-
-# # Create a session
-# session = Session()
-
-# try:
-#     # Update all rows in kw_report table
-#     stmt = update(KWReport).values(template_id="1")
-#     result = session.execute(stmt)
-    
-#     # Commit the transaction
-#     session.commit()
-    
-#     print(f"Updated {result.rowcount} rows in kw_report table")
-    
-# finally:
-#     # Close the session
-#     session.close()
